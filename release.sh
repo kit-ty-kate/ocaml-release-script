@@ -38,8 +38,11 @@ ask "Is it ok to push the new tag and current branch to the remote \"origin\"? [
 
 git push ${GIT_OPT} origin "${TAG}"
 git push ${GIT_OPT} origin "${CURRENT_BRANCH}"
-cp "${ARCHIVE}" "_build/"
-dune-release publish doc
+
+if grep -q "^doc: " "${NAME}.opam"; then
+  cp "${ARCHIVE}" "_build/"
+  dune-release publish doc
+fi
 
 if ${FORCE}; then
   echo "You can now update the release files at ${URL}/releases"
