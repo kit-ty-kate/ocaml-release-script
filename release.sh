@@ -22,7 +22,7 @@ VERSION=$(grep "^(version " dune-project | sed -Ee "s/^\(version (.*)\)/\1/")
 URL=$(grep "^dev-repo: " "${NAME}.opam" | sed -Ee "s/^dev-repo: \"git\+(.*)\.git\"/\1/")
 
 TAG=v${VERSION}
-ARCHIVE=${NAME}-${VERSION}.tbz
+ARCHIVE=${NAME}-${VERSION}.tar.gz
 CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
 CURRENT_BRANCH=$(git branch --show-current)
 
@@ -32,6 +32,7 @@ opam lint
 
 ask "Does that look alright? [Y/n] "
 
+# TODO: Add support for submodules
 git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 
 ask "Is it ok to push the new tag and current branch to the remote \"origin\"? [Y/n] "
