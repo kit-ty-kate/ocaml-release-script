@@ -23,7 +23,7 @@ URL=$(grep "^dev-repo: " "${NAME}.opam" | sed -Ee "s/^dev-repo: \"git\+(.*)\.git
 
 TAG=v${VERSION}
 ARCHIVE=${NAME}-${VERSION}.tbz
-CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3)
+CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
 CURRENT_BRANCH=$(git branch --show-current)
 
 dune-release tag
