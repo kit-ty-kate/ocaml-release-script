@@ -21,7 +21,15 @@ NAME=$(grep "^(name " dune-project | sed -Ee "s/^\(name (.*)\)/\1/")
 VERSION=$(grep "^(version " dune-project | sed -Ee "s/^\(version (.*)\)/\1/")
 URL=$(grep "^dev-repo: " "${NAME}.opam" | sed -Ee "s/^dev-repo: \"git\+(.*)\.git\"/\1/")
 
-TAG=v${VERSION}
+if git show-index "refs/tags/${VERSION}" > /dev/null; then
+  TAG=${VERSION}
+elif git show-index "refs/tags/v${VERSION}" > /dev/null; then
+  TAG=v${VERSION}
+else
+  echo "Could not find a tag for the current latest version \"${VERSION}\""
+  exit 1
+fi
+
 ARCHIVE=${NAME}-${VERSION}.tar.gz
 CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
 CURRENT_BRANCH=$(git branch --show-current)
