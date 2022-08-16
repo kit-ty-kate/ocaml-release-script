@@ -21,16 +21,14 @@ NAME=$(grep "^(name " dune-project | sed -Ee "s/^\(name (.*)\)/\1/")
 VERSION=$(opam show -f version "./${NAME}.opam")
 URL=$(opam show -f dev-repo "./${NAME}.opam" | sed -Ee 's/^"git\+(.*)"/\1/' | sed 's/\.git$//')
 
-dune-release tag
+ask "Is the project called '${NAME}'? [Y/n] "
+ask "Is the version '${VERSION}'? [Y/n] "
+ask "Is the project url '${URL}'? [Y/n] "
 
-if git show-ref "refs/tags/${VERSION}" > /dev/null; then
-  TAG=${VERSION}
-elif git show-ref "refs/tags/v${VERSION}" > /dev/null; then
-  TAG=v${VERSION}
-else
-  echo "Could not find a tag for the current latest version \"${VERSION}\""
-  exit 1
-fi
+echo "What do you want the tag to be named? "
+read TAG
+
+dune-release tag "${TAG}"
 
 ARCHIVE=${NAME}-${VERSION}.tar.gz
 CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
