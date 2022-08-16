@@ -18,8 +18,8 @@ ask() {
 }
 
 NAME=$(grep "^(name " dune-project | sed -Ee "s/^\(name (.*)\)/\1/")
-VERSION=$(grep "^(version " dune-project | sed -Ee "s/^\(version (.*)\)/\1/")
-URL=$(grep "^dev-repo: " "${NAME}.opam" | sed -Ee "s/^dev-repo: \"git\+(.*)\.git\"/\1/")
+VERSION=$(opam show -f version "./${NAME}.opam")
+URL=$(opam show -f dev-repo "./${NAME}.opam" | sed -Ee 's/^"git\+(.*)"/\1/' | sed 's/\.git$//')
 
 dune-release tag
 
