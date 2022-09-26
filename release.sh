@@ -9,7 +9,7 @@ case "${#}/${1}" in
 esac
 
 ask() {
-  echo "$1"
+  echo -n "$1"
   read answer
   case "${answer}" in
   "Y"|"y"|"yes"|"Yes"|"") ;;
@@ -25,7 +25,7 @@ ask "Is the project called '${NAME}'? [Y/n] "
 ask "Is the version '${VERSION}'? [Y/n] "
 ask "Is the project url '${URL}'? [Y/n] "
 
-echo "What do you want the tag to be named? "
+echo -n "What do you want the tag to be named? "
 read TAG
 
 dune-release tag "${TAG}"
