@@ -42,10 +42,11 @@ ask "Does that look alright? [Y/n] "
 # TODO: Add support for submodules
 git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 
-ask "Is it ok to push the new tag and current branch to the remote \"origin\"? [Y/n] "
+echo -n "Which branch do you want to push the new tag and current branch to? "
+read REMOTE
 
-git push ${GIT_OPT} origin "${TAG}"
-git push ${GIT_OPT} origin "${CURRENT_BRANCH}"
+git push ${GIT_OPT} "${REMOTE}" "${TAG}"
+git push ${GIT_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
 
 if grep -q "^doc: " "${NAME}.opam"; then
   cp "${ARCHIVE}" "_build/"
