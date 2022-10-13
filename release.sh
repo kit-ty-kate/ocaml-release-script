@@ -58,7 +58,7 @@ if ${FORCE}; then
   echo "Then call opam publish again:"
   echo "opam publish \"${URL}/releases/download/${TAG}/${ARCHIVE}\""
 else
-  echo "Now please create a new release at ${URL}/releases/new"
+  echo "Now please create a new release at ${URL}/releases/new?tag=${TAG}"
   echo "Here is the changelog to copy/past:"
   echo "${CHANGELOG}"
   echo
