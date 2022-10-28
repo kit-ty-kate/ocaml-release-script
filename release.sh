@@ -50,6 +50,11 @@ git push ${GIT_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
 
 if grep -q "^doc: " "${NAME}.opam"; then
   cp "${ARCHIVE}" "_build/"
+  (
+    cd _build/
+    tar xzf "${ARCHIVE}"
+    tar cjf "${NAME}-${VERSION}.tbz" "${NAME}-${VERSION}/"
+  )
   dune-release publish doc
 fi
 
