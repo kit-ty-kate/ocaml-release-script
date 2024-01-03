@@ -65,8 +65,12 @@ echo
 echo
 echo
 
-if ${FORCE}; then
+if "${FORCE}"; then
   echo "You can now update the release files at ${URL}/releases"
+  echo "Here is the changelog to copy/past:"
+  echo "${CHANGELOG}"
+  echo
+  echo "--------------------"
   echo "Then call opam publish again:"
   echo "opam publish \"${URL}/releases/download/${TAG}/${ARCHIVE}\""
 else
