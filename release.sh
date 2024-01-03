@@ -58,6 +58,10 @@ if grep -q "^doc: " "${NAME}.opam"; then
   dune-release publish doc
 fi
 
+echo
+echo
+echo
+
 if ${FORCE}; then
   echo "You can now update the release files at ${URL}/releases"
   echo "Then call opam publish again:"
