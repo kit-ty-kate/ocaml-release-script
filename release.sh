@@ -8,12 +8,18 @@ case "${#}/${1}" in
 *) echo "usage: ${0} [--force]"; exit 1 ;;
 esac
 
+ask_no_result() {
+  echo "Cancelling release..."
+  exit 1
+}
+
 ask() {
-  printf "%s" "$1"
+  printf "%s" "$2"
   read answer
   case "${answer}" in
-  "Y"|"y"|"yes"|"Yes"|"") ;;
-  *) echo "Cancelling release..."; exit 1 ;;
+  "") if test "$1" = "no" ; then ask_no_result ; fi ;;
+  "Y"|"y"|"yes"|"Yes") ;;
+  *) ask_no_result ;;
   esac
 }
 
@@ -21,17 +27,23 @@ NAME=$(grep "^(name " dune-project | sed -Ee "s/^\(name (.*)\)/\1/")
 VERSION=$(opam show -f version "./${NAME}.opam")
 URL=$(opam show -f dev-repo "./${NAME}.opam" | sed -Ee 's/^"git\+(.*)"/\1/' | sed 's/\.git$//')
 
-ask "Is the project called '${NAME}'? [Y/n] "
-ask "Is the version '${VERSION}'? [Y/n] "
-ask "Is the project url '${URL}'? [Y/n] "
+ask yes "Is the project called '${NAME}'? [Y/n] "
+ask yes "Is the version '${VERSION}'? [Y/n] "
+ask yes "Is the project url '${URL}'? [Y/n] "
 
 printf "What do you want the tag to be named? "
 read TAG
 
-if "${FORCE}" ; then
-  git tag -d "${TAG}"
+if git show "refs/tags/${TAG}" > /dev/null 2> /dev/null ; then
+  if "${FORCE}" ; then
+    git tag -d "${TAG}"
+    dune-release tag "${TAG}"
+  else
+    ask no "[WARNING] This tag already exists. Do you want to skip the automatic tag creation? [y/N] "
+  fi
+else
+  dune-release tag "${TAG}"
 fi
-dune-release tag "${TAG}"
 
 ARCHIVE=${NAME}-${VERSION}.tar.gz
 CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
@@ -40,7 +52,7 @@ CURRENT_BRANCH=$(git branch --show-current)
 dune-release check
 opam lint
 
-ask "Does that look alright? [Y/n] "
+ask yes "Does that look alright? [Y/n] "
 
 # TODO: Add support for submodules
 git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
