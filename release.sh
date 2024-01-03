@@ -9,7 +9,7 @@ case "${#}/${1}" in
 esac
 
 ask() {
-  echo -n "$1"
+  printf "%s" "$1"
   read answer
   case "${answer}" in
   "Y"|"y"|"yes"|"Yes"|"") ;;
@@ -25,7 +25,7 @@ ask "Is the project called '${NAME}'? [Y/n] "
 ask "Is the version '${VERSION}'? [Y/n] "
 ask "Is the project url '${URL}'? [Y/n] "
 
-echo -n "What do you want the tag to be named? "
+printf "What do you want the tag to be named? "
 read TAG
 
 if "${FORCE}" ; then
@@ -45,7 +45,7 @@ ask "Does that look alright? [Y/n] "
 # TODO: Add support for submodules
 git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 
-echo -n "Which branch do you want to push the new tag and current branch to? "
+printf "Which branch do you want to push the new tag and current branch to? "
 read REMOTE
 
 git push ${GIT_PUSH_TAG_OPT} "${REMOTE}" "${TAG}"
