@@ -3,8 +3,8 @@
 set -e
 
 case "${#}/${1}" in
-"0/") FORCE=false GIT_OPT="" ;;
-"1/--force") FORCE=true GIT_OPT="--force-with-lease" ;;
+"0/") FORCE=false GIT_PUSH_OPT="" GIT_PUSH_TAG_OPT="" ;;
+"1/--force") FORCE=true GIT_PUSH_OPT="--force-with-lease" GIT_PUSH_TAG_OPT="--force" ;;
 *) echo "usage: ${0} [--force]"; exit 1 ;;
 esac
 
@@ -28,6 +28,9 @@ ask "Is the project url '${URL}'? [Y/n] "
 echo -n "What do you want the tag to be named? "
 read TAG
 
+if "${FORCE}" ; then
+  git tag -d "${TAG}"
+fi
 dune-release tag "${TAG}"
 
 ARCHIVE=${NAME}-${VERSION}.tar.gz
@@ -45,8 +48,8 @@ git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 echo -n "Which branch do you want to push the new tag and current branch to? "
 read REMOTE
 
-git push ${GIT_OPT} "${REMOTE}" "${TAG}"
-git push ${GIT_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
+git push ${GIT_PUSH_TAG_OPT} "${REMOTE}" "${TAG}"
+git push ${GIT_PUSH_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
 
 if grep -q "^doc: " "${NAME}.opam"; then
   cp "${ARCHIVE}" "_build/"
