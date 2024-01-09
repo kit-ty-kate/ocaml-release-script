@@ -15,7 +15,7 @@ ask_no_result() {
 
 ask() {
   printf "%s" "$2"
-  read answer
+  read -r answer
   case "${answer}" in
   "") if test "$1" = "no" ; then ask_no_result ; fi ;;
   "Y"|"y"|"yes"|"Yes") ;;
@@ -32,7 +32,7 @@ ask yes "Is the version '${VERSION}'? [Y/n] "
 ask yes "Is the project url '${URL}'? [Y/n] "
 
 printf "What do you want the tag to be named? "
-read TAG
+read -r TAG
 
 if git show "refs/tags/${TAG}" > /dev/null 2> /dev/null ; then
   if "${FORCE}" ; then
@@ -58,7 +58,7 @@ ask yes "Does that look alright? [Y/n] "
 git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 
 printf "Which branch do you want to push the new tag and current branch to? "
-read REMOTE
+read -r REMOTE
 
 git push ${GIT_PUSH_TAG_OPT} "${REMOTE}" "${TAG}"
 git push ${GIT_PUSH_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
