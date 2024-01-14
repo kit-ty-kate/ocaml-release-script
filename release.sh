@@ -48,14 +48,56 @@ fi
 ARCHIVE=${NAME}-${VERSION}.tar.gz
 CHANGELOG=$(git tag -n99 "${TAG}" | tail -n +3 | sed "s/^ *//")
 CURRENT_BRANCH=$(git branch --show-current)
+SUBMODULES=$(git submodule)
 
-dune-release check
-opam lint
+WITH_SUBMODULES=no
+if test -n "${SUBMODULES}" ; then
+  printf "Git submodules detected. Do you want to include all the submodules? [y/n] "
+  read -r answer
+
+  case "${answer}" in
+  "Y"|"y"|"yes"|"Yes") WITH_SUBMODULES=yes ;;
+  "N"|"n"|"no"|"No") ;;
+  *) ask_no_result ;;
+  esac
+fi
+
+ARCHIVE_TMP_DIR=$(mktemp -d)
+ARCHIVE_PREFIX="${NAME}-${VERSION}"
+mkdir -p "${ARCHIVE_TMP_DIR}"
+
+if test "${WITH_SUBMODULES}" = yes ; then
+  # TODO: Add support for recursive submodules
+  (
+    export ARCHIVE_PREFIX
+    export ARCHIVE_TMP_DIR
+
+    # shellcheck disable=SC2016
+    git submodule foreach 'git archive "${sha1}" --prefix "${ARCHIVE_PREFIX}/${sm_path}/" -o "${ARCHIVE_TMP_DIR}/${name}.tar.gz"'
+  )
+fi
+git archive "${TAG}" --prefix "${ARCHIVE_PREFIX}/" -o "${ARCHIVE_TMP_DIR}/main.tar.gz"
+
+(
+  PREV_CWD=$(pwd)
+  cd "${ARCHIVE_TMP_DIR}"
+
+  for ar in ./* ; do
+    tar xzf "${ar}"
+  done
+
+  tar czf "${PREV_CWD}/${ARCHIVE}" "${ARCHIVE_PREFIX}/"
+)
+
+(
+  PREV_CWD=$(pwd)
+  cd "${ARCHIVE_TMP_DIR}/${ARCHIVE_PREFIX}/"
+  cp -r "${PREV_CWD}/.git" .
+  dune-release check --working-tree
+  opam lint
+)
 
 ask yes "Does that look alright? [Y/n] "
-
-# TODO: Add support for submodules
-git archive "${TAG}" --prefix "${NAME}-${VERSION}/" -o "${ARCHIVE}"
 
 printf "Which branch do you want to push the new tag and current branch to? "
 read -r REMOTE
