@@ -24,6 +24,12 @@ ask() {
 }
 
 NAME=$(grep "^(name " dune-project | sed -Ee "s/^\(name (.*)\)/\1/")
+
+if test -z "${NAME}" ; then
+  echo "Your dune-project must have a (name ...) field"
+  exit 1
+fi
+
 VERSION=$(opam show -f version "./${NAME}.opam")
 URL=$(opam show -f dev-repo "./${NAME}.opam" | sed -Ee 's/^"git\+(.*)"/\1/' | sed 's/\.git$//')
 
