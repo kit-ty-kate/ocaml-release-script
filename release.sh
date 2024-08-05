@@ -43,12 +43,12 @@ read -r TAG
 if git show "refs/tags/${TAG}" > /dev/null 2> /dev/null ; then
   if "${FORCE}" ; then
     git tag -d "${TAG}"
-    dune-release tag "${TAG}"
+    printf 'CHANGES:\n%s' "$(cat CHANGES)" | git tag --edit -aF - "$TAG"
   else
     ask no "[WARNING] This tag already exists. Do you want to skip the automatic tag creation? [y/N] "
   fi
 else
-  dune-release tag "${TAG}"
+  printf 'CHANGES:\n%s' "$(cat CHANGES)" | git tag --edit -aF - "$TAG"
 fi
 
 ARCHIVE=${NAME}-${VERSION}.tar.gz
@@ -96,10 +96,7 @@ git archive "${TAG}" --prefix "${ARCHIVE_PREFIX}/" -o "${ARCHIVE_TMP_DIR}/main.t
 )
 
 (
-  PREV_CWD=$(pwd)
   cd "${ARCHIVE_TMP_DIR}/${ARCHIVE_PREFIX}/"
-  cp -r "${PREV_CWD}/.git" .
-  dune-release check --working-tree
   opam lint
 )
 
@@ -110,16 +107,6 @@ read -r REMOTE
 
 git push ${GIT_PUSH_TAG_OPT} "${REMOTE}" "${TAG}"
 git push ${GIT_PUSH_OPT} "${REMOTE}" "${CURRENT_BRANCH}"
-
-if grep -q "^doc: " "${NAME}.opam"; then
-  cp "${ARCHIVE}" "_build/"
-  (
-    cd _build/
-    tar xzf "${ARCHIVE}"
-    tar cjf "${NAME}-${VERSION}.tbz" "${NAME}-${VERSION}/"
-  )
-  dune-release publish doc
-fi
 
 echo
 echo
